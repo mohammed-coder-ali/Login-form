@@ -2,156 +2,229 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Secure Login</title>
+<title>DevFox Community</title>
 
 <style>
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f2f2f2;
+    background: #0f0f14;
+    color: white;
+}
+
+/* HEADER */
+header {
+    background: #1a1a22;
+    padding: 15px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
 }
 
-.container {
-    background: white;
-    padding: 40px;
-    width: 350px;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    text-align: center;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ff7139;
 }
 
 button {
-    width: 100%;
-    padding: 12px;
+    background: #ff7139;
     border: none;
-    border-radius: 5px;
-    background: black;
+    padding: 8px 12px;
+    border-radius: 6px;
     color: white;
-    font-size: 16px;
     cursor: pointer;
 }
 
 button:hover {
-    background: #333;
+    opacity: 0.85;
 }
 
-/* Hacked Screen */
-#hackedScreen {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
+input, textarea {
     width: 100%;
-    height: 100%;
-    background: black;
-    color: red;
-    text-align: center;
-    padding-top: 100px;
-    animation: flicker 0.15s infinite;
+    padding: 8px;
+    margin-top: 8px;
+    background: #121212;
+    border: none;
+    color: white;
+    border-radius: 6px;
 }
 
-/* Flicker Effect */
-@keyframes flicker {
-    0% {opacity: 1;}
-    50% {opacity: 0.8;}
-    100% {opacity: 1;}
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 10px;
 }
 
-/* Glitch Text */
-.glitch {
-    font-size: 50px;
-    font-weight: bold;
-    position: relative;
-    color: red;
-    animation: glitch 1s infinite;
+.card {
+    background: #1e1e28;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
-@keyframes glitch {
-    0% {text-shadow: 2px 2px red;}
-    20% {text-shadow: -2px -2px lime;}
-    40% {text-shadow: 2px -2px blue;}
-    60% {text-shadow: -2px 2px purple;}
-    80% {text-shadow: 2px 2px red;}
-    100% {text-shadow: -2px -2px lime;}
+/* LOGIN SCREEN */
+#authScreen {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-#terminal {
-    margin-top: 30px;
-    font-family: monospace;
-    font-size: 18px;
+/* POSTS */
+.post {
+    background: #1e1e28;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.small {
+    font-size: 13px;
+    color: #aaa;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container" id="loginBox">
-    <h2>Sign In</h2>
-    <input type="text" id="username" placeholder="Email or Username" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button onclick="trigger()">Login</button>
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+    <div class="card" style="width:350px;">
+        <h2 style="text-align:center;color:#ff7139;">🦊 DevFox</h2>
+        <input type="text" id="authUsername" placeholder="Username">
+        <input type="password" id="authPassword" placeholder="Password">
+        <button onclick="signup()">Sign Up</button>
+        <button onclick="login()">Login</button>
+    </div>
 </div>
 
-<div id="hackedScreen">
-    <div class="glitch">YOU GOT HACKED</div>
-    <div id="terminal"></div>
+<!-- MAIN APP -->
+<div id="app" style="display:none;">
+
+<header>
+    <div class="logo">🦊 DevFox</div>
+    <div>
+        <span id="currentUser"></span>
+        <button onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <textarea id="postContent" placeholder="Share something with developers..."></textarea>
+        <button onclick="addPost()">Post</button>
+    </div>
+
+    <div id="posts"></div>
+
 </div>
 
-<!-- Loud Sound -->
-<audio id="scream" src="https://www.myinstants.com/media/sounds/movie_1.mp3"></audio>
+</div>
 
 <script>
-function trigger() {
-    var user = document.getElementById("username").value;
-    var pass = document.getElementById("password").value;
+let users = JSON.parse(localStorage.getItem("devfoxUsers")) || [];
+let posts = JSON.parse(localStorage.getItem("devfoxPosts")) || [];
+let currentUser = JSON.parse(localStorage.getItem("devfoxCurrentUser"));
 
-    if(user !== "" && pass !== "") {
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("hackedScreen").style.display = "block";
-
-        // Play loud sound
-        document.getElementById("scream").play();
-
-        fakeIP();
-    } else {
-        alert("Please fill all fields");
-    }
+function saveData() {
+    localStorage.setItem("devfoxUsers", JSON.stringify(users));
+    localStorage.setItem("devfoxPosts", JSON.stringify(posts));
+    localStorage.setItem("devfoxCurrentUser", JSON.stringify(currentUser));
 }
 
-function fakeIP() {
-    var terminal = document.getElementById("terminal");
-    var text = [
-        "Accessing system...",
-        "Bypassing firewall...",
-        "IP Address Detected: 192.168.0." + Math.floor(Math.random() * 255),
-        "Location: Iraq",
-        "Device: iPhone / Android",
-        "Uploading data...",
-        "System breach complete."
-    ];
+/* AUTH */
 
-    let i = 0;
-    let interval = setInterval(function() {
-        if(i < text.length) {
-            terminal.innerHTML += text[i] + "<br>";
-            i++;
-        } else {
-            clearInterval(interval);
-        }
-    }, 800);
+function signup() {
+    const username = document.getElementById("authUsername").value;
+    const password = document.getElementById("authPassword").value;
+
+    if (!username || !password) return alert("Fill all fields");
+
+    if (users.find(u => u.username === username)) {
+        return alert("Username already exists");
+    }
+
+    users.push({ username, password });
+    currentUser = username;
+    saveData();
+    startApp();
+}
+
+function login() {
+    const username = document.getElementById("authUsername").value;
+    const password = document.getElementById("authPassword").value;
+
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (!user) return alert("Invalid login");
+
+    currentUser = username;
+    saveData();
+    startApp();
+}
+
+function logout() {
+    currentUser = null;
+    saveData();
+    location.reload();
+}
+
+/* START APP */
+
+function startApp() {
+    document.getElementById("authScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("currentUser").innerText = "@" + currentUser;
+    renderPosts();
+}
+
+/* POSTS */
+
+function addPost() {
+    const content = document.getElementById("postContent").value;
+    if (!content) return;
+
+    posts.unshift({
+        id: Date.now(),
+        author: currentUser,
+        content,
+        likes: 0
+    });
+
+    document.getElementById("postContent").value = "";
+    saveData();
+    renderPosts();
+}
+
+function likePost(id) {
+    const post = posts.find(p => p.id === id);
+    post.likes++;
+    saveData();
+    renderPosts();
+}
+
+function renderPosts() {
+    const container = document.getElementById("posts");
+    container.innerHTML = "";
+
+    posts.forEach(post => {
+        container.innerHTML += `
+            <div class="post">
+                <div class="small">@${post.author}</div>
+                <div>${post.content}</div>
+                <div class="small">🔥 ${post.likes} likes</div>
+                <button onclick="likePost(${post.id})">Like</button>
+            </div>
+        `;
+    });
+}
+
+/* AUTO LOGIN IF USER EXISTS */
+
+if (currentUser) {
+    startApp();
 }
 </script>
 
