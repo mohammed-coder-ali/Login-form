@@ -12,7 +12,6 @@ body {
     color: white;
 }
 
-/* HEADER */
 header {
     background: #1a1a22;
     padding: 15px;
@@ -30,17 +29,14 @@ header {
 button {
     background: #ff7139;
     border: none;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 6px;
     color: white;
     cursor: pointer;
+    margin-top: 5px;
 }
 
-button:hover {
-    opacity: 0.85;
-}
-
-input, textarea {
+input, textarea, select {
     width: 100%;
     padding: 8px;
     margin-top: 8px;
@@ -63,15 +59,6 @@ input, textarea {
     margin-bottom: 20px;
 }
 
-/* LOGIN SCREEN */
-#authScreen {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* POSTS */
 .post {
     background: #1e1e28;
     padding: 15px;
@@ -88,10 +75,9 @@ input, textarea {
 
 <body>
 
-<!-- AUTH SCREEN -->
-<div id="authScreen">
-    <div class="card" style="width:350px;">
-        <h2 style="text-align:center;color:#ff7139;">🦊 DevFox</h2>
+<div id="authScreen" class="container">
+    <div class="card">
+        <h2 style="color:#ff7139;text-align:center;">🦊 DevFox</h2>
         <input type="text" id="authUsername" placeholder="Username">
         <input type="password" id="authPassword" placeholder="Password">
         <button onclick="signup()">Sign Up</button>
@@ -99,9 +85,7 @@ input, textarea {
     </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="app" style="display:none;">
-
 <header>
     <div class="logo">🦊 DevFox</div>
     <div>
@@ -112,119 +96,180 @@ input, textarea {
 
 <div class="container">
 
-    <div class="card">
-        <textarea id="postContent" placeholder="Share something with developers..."></textarea>
-        <button onclick="addPost()">Post</button>
-    </div>
+<div class="card">
+<textarea id="postContent" placeholder="Share something... Use #hashtags"></textarea>
 
-    <div id="posts"></div>
+<select id="category">
+<option>Web</option>
+<option>AI</option>
+<option>Swift</option>
+<option>Roblox</option>
+</select>
 
+<button onclick="addPost()">Post</button>
 </div>
 
+<div id="posts"></div>
+
+</div>
 </div>
 
 <script>
 let users = JSON.parse(localStorage.getItem("devfoxUsers")) || [];
 let posts = JSON.parse(localStorage.getItem("devfoxPosts")) || [];
-let currentUser = JSON.parse(localStorage.getItem("devfoxCurrentUser"));
+let currentUser = localStorage.getItem("devfoxCurrentUser");
 
-function saveData() {
-    localStorage.setItem("devfoxUsers", JSON.stringify(users));
-    localStorage.setItem("devfoxPosts", JSON.stringify(posts));
-    localStorage.setItem("devfoxCurrentUser", JSON.stringify(currentUser));
+function saveAll() {
+localStorage.setItem("devfoxUsers", JSON.stringify(users));
+localStorage.setItem("devfoxPosts", JSON.stringify(posts));
+localStorage.setItem("devfoxCurrentUser", currentUser);
 }
 
 /* AUTH */
 
 function signup() {
-    const username = document.getElementById("authUsername").value;
-    const password = document.getElementById("authPassword").value;
+const username = authUsername.value.trim();
+const password = authPassword.value.trim();
 
-    if (!username || !password) return alert("Fill all fields");
+if(!username || !password) return alert("Fill fields");
 
-    if (users.find(u => u.username === username)) {
-        return alert("Username already exists");
-    }
+if(users.find(u => u.username === username))
+return alert("Username exists");
 
-    users.push({ username, password });
-    currentUser = username;
-    saveData();
-    startApp();
+users.push({ username, password, rank: "New Dev" });
+currentUser = username;
+saveAll();
+startApp();
 }
 
 function login() {
-    const username = document.getElementById("authUsername").value;
-    const password = document.getElementById("authPassword").value;
+const username = authUsername.value.trim();
+const password = authPassword.value.trim();
 
-    const user = users.find(u => u.username === username && u.password === password);
+const user = users.find(u => u.username === username && u.password === password);
+if(!user) return alert("Invalid login");
 
-    if (!user) return alert("Invalid login");
-
-    currentUser = username;
-    saveData();
-    startApp();
+currentUser = username;
+saveAll();
+startApp();
 }
 
 function logout() {
-    currentUser = null;
-    saveData();
-    location.reload();
+currentUser = null;
+localStorage.removeItem("devfoxCurrentUser");
+location.reload();
 }
 
-/* START APP */
+/* START */
 
 function startApp() {
-    document.getElementById("authScreen").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    document.getElementById("currentUser").innerText = "@" + currentUser;
-    renderPosts();
+authScreen.style.display = "none";
+app.style.display = "block";
+currentUserDisplay();
+renderPosts();
+}
+
+function currentUserDisplay(){
+const user = users.find(u=>u.username===currentUser);
+currentUserSpan = document.getElementById("currentUser");
+currentUserSpan.innerText = "@" + currentUser + " ("+user.rank+")";
 }
 
 /* POSTS */
 
-function addPost() {
-    const content = document.getElementById("postContent").value;
-    if (!content) return;
+function addPost(){
+const content = postContent.value.trim();
+const category = document.getElementById("category").value;
+if(!content) return;
 
-    posts.unshift({
-        id: Date.now(),
-        author: currentUser,
-        content,
-        likes: 0
-    });
+posts.unshift({
+id: Date.now(),
+author: currentUser,
+content,
+category,
+likes: 0,
+comments: [],
+timestamp: Date.now()
+});
 
-    document.getElementById("postContent").value = "";
-    saveData();
-    renderPosts();
+updateRank();
+postContent.value="";
+saveAll();
+renderPosts();
 }
 
-function likePost(id) {
-    const post = posts.find(p => p.id === id);
-    post.likes++;
-    saveData();
-    renderPosts();
+function likePost(id){
+const post = posts.find(p=>p.id===id);
+post.likes++;
+saveAll();
+renderPosts();
 }
 
-function renderPosts() {
-    const container = document.getElementById("posts");
-    container.innerHTML = "";
+function addComment(id){
+const input = document.getElementById("comment-"+id);
+if(!input.value) return;
 
-    posts.forEach(post => {
-        container.innerHTML += `
-            <div class="post">
-                <div class="small">@${post.author}</div>
-                <div>${post.content}</div>
-                <div class="small">🔥 ${post.likes} likes</div>
-                <button onclick="likePost(${post.id})">Like</button>
-            </div>
-        `;
-    });
+const post = posts.find(p=>p.id===id);
+post.comments.push({
+user: currentUser,
+text: input.value
+});
+
+input.value="";
+saveAll();
+renderPosts();
 }
 
-/* AUTO LOGIN IF USER EXISTS */
+/* RANK SYSTEM */
 
-if (currentUser) {
-    startApp();
+function updateRank(){
+const userPosts = posts.filter(p=>p.author===currentUser).length;
+const user = users.find(u=>u.username===currentUser);
+
+if(userPosts > 10) user.rank="Senior Dev";
+else if(userPosts > 5) user.rank="Active Dev";
+else user.rank="New Dev";
+
+saveAll();
+}
+
+/* TRENDING (sort by likes) */
+
+function renderPosts(){
+const container = document.getElementById("posts");
+container.innerHTML="";
+
+let sorted = [...posts].sort((a,b)=>b.likes - a.likes);
+
+sorted.forEach(post=>{
+container.innerHTML+=`
+<div class="post">
+<div class="small">@${post.author} • ${post.category}</div>
+<div>${highlightHashtags(post.content)}</div>
+<div class="small">🔥 ${post.likes} likes</div>
+<button onclick="likePost(${post.id})">Like</button>
+
+<div style="margin-top:10px;">
+<input id="comment-${post.id}" placeholder="Comment...">
+<button onclick="addComment(${post.id})">Add</button>
+${post.comments.map(c=>`<div class="small">@${c.user}: ${c.text}</div>`).join("")}
+</div>
+
+</div>
+`;
+});
+}
+
+/* HASHTAG STYLE */
+
+function highlightHashtags(text){
+return text.replace(/#(\w+)/g,'<span style="color:#ff7139;">#$1</span>');
+}
+
+/* AUTO LOGIN */
+
+if(currentUser){
+startApp();
 }
 </script>
 
