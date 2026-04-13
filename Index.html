@@ -1,277 +1,2151 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>DevFox Community</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>زينوفا — عطور فاخرة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600&family=Tajawal:wght@200;300;400;500&display=swap" rel="stylesheet" />
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0f0f14;
-    color: white;
-}
+  <style>
+    /* ═══════════════════════════════════════════
+       ROOT & RESET
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-header {
-    background: #1a1a22;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    :root {
+      --ink:        #0F0E0C;
+      --charcoal:   #1C1A17;
+      --graphite:   #2E2B26;
+      --sand:       #F7F3EC;
+      --parchment:  #EEE8DC;
+      --warm-white: #FAF8F4;
+      --gold:       #B5902A;
+      --gold-light: #D4AF6A;
+      --gold-pale:  #F2E7CB;
+      --mist:       #8C887F;
+      --fog:        #C8C3BA;
+      --error:      #b94040;
 
-.logo {
-    font-size: 22px;
-    font-weight: bold;
-    color: #ff7139;
-}
+      --font-display: 'Playfair Display', 'Georgia', serif;
+      --font-body:    'Tajawal', 'Arial', sans-serif;
 
-button {
-    background: #ff7139;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-    margin-top: 5px;
-}
+      --ease:       cubic-bezier(.25,.46,.45,.94);
+      --dur:        .38s;
 
-input, textarea, select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 8px;
-    background: #121212;
-    border: none;
-    color: white;
-    border-radius: 6px;
-}
+      --shadow-sm:  0 2px 20px rgba(15,14,12,.06);
+      --shadow-md:  0 6px 40px rgba(15,14,12,.11);
+      --shadow-lg:  0 16px 70px rgba(15,14,12,.18);
+    }
 
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 10px;
-}
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
 
-.card {
-    background: #1e1e28;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
+    body {
+      font-family: var(--font-body);
+      background: var(--warm-white);
+      color: var(--ink);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
 
-.post {
-    background: #1e1e28;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-}
+    img { display: block; max-width: 100%; }
+    button { cursor: pointer; font-family: var(--font-body); }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
 
-.small {
-    font-size: 13px;
-    color: #aaa;
-}
-</style>
+    /* ═══════════════════════════════════════════
+       LOADING SCREEN
+    ═══════════════════════════════════════════ */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--ink);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      transition: opacity .6s ease, visibility .6s ease;
+    }
+    #loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loading-logo {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 8vw, 56px);
+      font-weight: 300;
+      letter-spacing: .35em;
+      color: var(--sand);
+      animation: brandReveal .9s var(--ease) both;
+    }
+    .loading-bar {
+      width: 100px;
+      height: 1px;
+      background: rgba(247,243,236,.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .loading-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold);
+      transform: translateX(100%);
+      animation: barFill 1.1s var(--ease) .2s both;
+    }
+    @keyframes brandReveal {
+      from { opacity:0; letter-spacing:.7em; }
+      to   { opacity:1; letter-spacing:.35em; }
+    }
+    @keyframes barFill {
+      from { transform: translateX(100%); }
+      to   { transform: translateX(0); }
+    }
+
+    /* ═══════════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════════ */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 900;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      background: rgba(250,248,244,.93);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(181,144,42,.13);
+      transition: height var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    }
+    .navbar.scrolled {
+      height: 62px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-brand {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 300;
+      letter-spacing: .22em;
+      color: var(--ink);
+      transition: color var(--dur);
+    }
+    .nav-brand:hover { color: var(--gold); }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      align-items: center;
+    }
+    .nav-links a {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: .18em;
+      color: var(--graphite);
+      position: relative;
+      transition: color var(--dur);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      right: 0; left: 0;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform var(--dur) var(--ease);
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* language toggle */
+    .lang-toggle {
+      display: flex;
+      gap: 0;
+      border: 1px solid rgba(181,144,42,.3);
+      overflow: hidden;
+    }
+    .lang-toggle button {
+      padding: 5px 13px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      background: transparent;
+      border: none;
+      color: var(--mist);
+      transition: all .25s;
+    }
+    .lang-toggle button.active {
+      background: var(--ink);
+      color: var(--sand);
+    }
+    .lang-toggle button:hover:not(.active) {
+      background: var(--parchment);
+      color: var(--gold);
+    }
+
+    /* cart button */
+    .cart-trigger {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 8px;
+      color: var(--ink);
+      transition: color var(--dur);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cart-trigger:hover { color: var(--gold); }
+    .cart-trigger svg { width: 22px; height: 22px; }
+    .cart-badge {
+      position: absolute;
+      top: 0; left: 0;
+      width: 18px; height: 18px;
+      background: var(--gold);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(0);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    .cart-badge.show { transform: scale(1); }
+
+    /* ═══════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 72px 80px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-eyebrow {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .38em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 26px;
+      animation: fadeUp .7s var(--ease) .3s both;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(44px, 5.5vw, 76px);
+      font-weight: 300;
+      line-height: 1.08;
+      color: var(--ink);
+      margin-bottom: 26px;
+      animation: fadeUp .7s var(--ease) .45s both;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.85;
+      max-width: 360px;
+      margin-bottom: 52px;
+      animation: fadeUp .7s var(--ease) .6s both;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 17px 40px;
+      background: var(--ink);
+      color: var(--sand);
+      border: 1px solid var(--ink);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      transition: all var(--dur) var(--ease);
+      animation: fadeUp .7s var(--ease) .75s both;
+      width: fit-content;
+    }
+    .hero-cta svg { width: 16px; height: 16px; transition: transform var(--dur); }
+    .hero-cta:hover {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+    .hero-cta:hover svg { transform: translateX(-5px); }
+
+    .hero-decor {
+      position: absolute;
+      bottom: 48px;
+      right: 72px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 9px;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--fog);
+      animation: fadeUp .7s var(--ease) 1s both;
+    }
+    .hero-decor::before {
+      content: '';
+      display: block;
+      width: 50px;
+      height: 1px;
+      background: var(--gold-light);
+    }
+
+    .hero-visual {
+      position: relative;
+      overflow: hidden;
+      background: var(--parchment);
+    }
+    .hero-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      animation: zoomPan 14s ease-in-out infinite alternate;
+    }
+    .hero-visual-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(270deg, transparent 55%, var(--warm-white) 100%);
+    }
+
+    @keyframes zoomPan {
+      from { transform: scale(1); }
+      to   { transform: scale(1.05); }
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(22px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════
+       GOLD RULE
+    ═══════════════════════════════════════════ */
+    .gold-rule {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    }
+
+    /* ═══════════════════════════════════════════
+       SECTION COMMONS
+    ═══════════════════════════════════════════ */
+    .section {
+      padding: 110px 72px;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+    .section-eyebrow {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4vw, 54px);
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--mist);
+      max-width: 460px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* ═══════════════════════════════════════════
+       PRODUCTS GRID
+    ═══════════════════════════════════════════ */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+
+    .product-card {
+      position: relative;
+      background: var(--warm-white);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity .6s var(--ease), transform .6s var(--ease);
+    }
+    .product-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .product-card:nth-child(2) { transition-delay: .12s; }
+    .product-card:nth-child(3) { transition-delay: .24s; }
+
+    .product-img-wrap {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      background: var(--parchment);
+    }
+    .product-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform .7s var(--ease);
+    }
+    .product-card:hover .product-img-wrap img {
+      transform: scale(1.06);
+    }
+
+    .product-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15,14,12,0);
+      display: flex;
+      align-items: flex-end;
+      padding: 20px;
+      transition: background var(--dur);
+    }
+    .product-card:hover .product-overlay {
+      background: rgba(15,14,12,.32);
+    }
+
+    .product-add-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--sand);
+      color: var(--ink);
+      border: none;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      transition: all var(--dur) var(--ease);
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    .product-card:hover .product-add-btn {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .product-add-btn:hover {
+      background: var(--gold);
+      color: #fff;
+    }
+    .product-add-btn.added {
+      background: var(--gold);
+      color: #fff;
+    }
+
+    .product-body {
+      padding: 22px 4px 10px;
+    }
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .product-desc {
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+    .product-price {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--gold);
+    }
+    .product-notes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .note-tag {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--mist);
+      border: 1px solid rgba(140,136,127,.25);
+      padding: 3px 9px;
+    }
+
+    /* ═══════════════════════════════════════════
+       ABOUT BAND
+    ═══════════════════════════════════════════ */
+    .about-band {
+      background: var(--ink);
+      color: var(--sand);
+      padding: 100px 72px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-img {
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+    }
+    .about-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: sepia(15%) brightness(.85);
+    }
+    .about-img::after {
+      content: '';
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgba(181,144,42,.28);
+      pointer-events: none;
+    }
+
+    .about-content {}
+    .about-eyebrow {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 22px;
+    }
+    .about-title {
+      font-family: var(--font-display);
+      font-size: clamp(30px, 3.5vw, 48px);
+      font-weight: 300;
+      line-height: 1.18;
+      color: var(--sand);
+      margin-bottom: 22px;
+    }
+    .about-text {
+      font-size: 14px;
+      font-weight: 300;
+      color: rgba(247,243,236,.55);
+      line-height: 1.9;
+    }
+    .about-stats {
+      display: flex;
+      gap: 44px;
+      margin-top: 48px;
+      padding-top: 36px;
+      border-top: 1px solid rgba(181,144,42,.18);
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 38px;
+      font-weight: 300;
+      color: var(--gold-light);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(247,243,236,.35);
+    }
+
+    /* ═══════════════════════════════════════════
+       CART DRAWER
+    ═══════════════════════════════════════════ */
+    .cart-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,14,12,.48);
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--dur), visibility var(--dur);
+    }
+    .cart-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .cart-drawer {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 460px;
+      max-width: 100vw;
+      background: var(--warm-white);
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform .42s var(--ease);
+      box-shadow: var(--shadow-lg);
+    }
+    .cart-drawer.open {
+      transform: translateX(0);
+    }
+
+    .cart-head {
+      padding: 30px 36px 22px;
+      border-bottom: 1px solid var(--parchment);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .cart-head-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .cart-close {
+      background: none;
+      border: none;
+      font-size: 22px;
+      line-height: 1;
+      color: var(--mist);
+      transition: color var(--dur);
+      padding: 4px 8px;
+    }
+    .cart-close:hover { color: var(--ink); }
+
+    .cart-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 36px;
+    }
+
+    .cart-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 14px;
+      text-align: center;
+      padding: 40px 0;
+    }
+    .cart-empty-icon {
+      font-size: 44px;
+      opacity: .18;
+    }
+    .cart-empty-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--ink);
+    }
+    .cart-empty-sub {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--mist);
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 78px 1fr auto;
+      gap: 16px;
+      align-items: start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--parchment);
+    }
+    .cart-item-img {
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      background: var(--parchment);
+    }
+    .cart-item-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .cart-item-name {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .cart-item-price {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .qty-row {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--fog);
+    }
+    .qty-btn {
+      background: none;
+      border: none;
+      width: 30px; height: 30px;
+      font-size: 15px;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--dur);
+    }
+    .qty-btn:hover { background: var(--parchment); }
+    .qty-val {
+      width: 34px; height: 30px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      border-right: 1px solid var(--fog);
+      border-left: 1px solid var(--fog);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--mist);
+      padding: 4px 0;
+      transition: color var(--dur);
+      margin-top: 8px;
+    }
+    .remove-btn:hover { color: var(--error); }
+
+    .cart-foot {
+      padding: 20px 36px 36px;
+      border-top: 1px solid var(--parchment);
+    }
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .cart-total-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--mist);
+    }
+    .cart-total-val {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .checkout-btn {
+      width: 100%;
+      padding: 18px;
+      background: var(--ink);
+      color: var(--sand);
+      border: none;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      transition: background var(--dur);
+    }
+    .checkout-btn:hover { background: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       PAYMENT MODAL
+    ═══════════════════════════════════════════ */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,14,12,.55);
+      z-index: 1100;
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--dur), visibility var(--dur);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .payment-modal {
+      background: var(--warm-white);
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(30px) scale(.97);
+      transition: transform .4s var(--ease);
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-backdrop.open .payment-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-head {
+      padding: 32px 40px 24px;
+      border-bottom: 1px solid var(--parchment);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--mist);
+      padding: 4px 8px;
+      transition: color var(--dur);
+    }
+    .modal-close:hover { color: var(--ink); }
+
+    .modal-body {
+      padding: 32px 40px;
+    }
+
+    /* customer fields */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--mist);
+    }
+    .form-input {
+      padding: 14px 16px;
+      background: transparent;
+      border: 1px solid var(--fog);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--ink);
+      outline: none;
+      transition: border-color var(--dur);
+      width: 100%;
+    }
+    .form-input:focus { border-color: var(--gold); }
+
+    .payment-divider {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin: 28px 0 18px;
+    }
+
+    .payment-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .pay-option {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border: 1px solid var(--fog);
+      background: transparent;
+      width: 100%;
+      text-align: right;
+      transition: all var(--dur);
+      cursor: pointer;
+    }
+    .pay-option:hover, .pay-option.selected {
+      border-color: var(--gold);
+      background: var(--gold-pale);
+    }
+    .pay-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .pay-icon.visa   { background: rgba(26,24,22,.07); }
+    .pay-icon.paypal { background: rgba(0,112,243,.08); }
+    .pay-icon.local  { background: rgba(181,144,42,.1); }
+    .pay-info { flex: 1; }
+    .pay-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+    .pay-desc {
+      font-size: 11px;
+      font-weight: 300;
+      color: var(--mist);
+    }
+    .pay-radio {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--fog);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color var(--dur);
+    }
+    .pay-option.selected .pay-radio { border-color: var(--gold); }
+    .pay-radio-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity var(--dur);
+    }
+    .pay-option.selected .pay-radio-dot { opacity: 1; }
+
+    .modal-summary {
+      background: var(--parchment);
+      padding: 18px 20px;
+      margin-bottom: 22px;
+      border: 1px solid rgba(181,144,42,.15);
+    }
+    .modal-summary-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--mist);
+      margin-bottom: 12px;
+    }
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--graphite);
+      margin-bottom: 6px;
+    }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      margin-top: 6px;
+      border-top: 1px solid rgba(181,144,42,.2);
+    }
+    .summary-total-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--mist);
+    }
+    .summary-total-val {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .place-order-btn {
+      width: 100%;
+      padding: 20px;
+      background: var(--ink);
+      color: var(--sand);
+      border: none;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      transition: background var(--dur);
+    }
+    .place-order-btn:hover:not(:disabled) { background: var(--gold); }
+    .place-order-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    /* ═══════════════════════════════════════════
+       SUCCESS MODAL
+    ═══════════════════════════════════════════ */
+    .success-modal {
+      background: var(--warm-white);
+      width: 100%;
+      max-width: 480px;
+      padding: 64px 48px;
+      text-align: center;
+      transform: scale(.94);
+      transition: transform .4s var(--ease);
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-backdrop.open .success-modal {
+      transform: scale(1);
+    }
+    .success-check {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: var(--gold);
+      margin: 0 auto 32px;
+      animation: successPop .6s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes successPop {
+      from { transform: scale(0) rotate(-180deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    .success-eyebrow {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: 14px;
+    }
+    .success-text {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--mist);
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+    .success-order {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 40px;
+    }
+    .success-continue {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      background: var(--ink);
+      color: var(--sand);
+      border: none;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      transition: background var(--dur);
+    }
+    .success-continue:hover { background: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    .footer {
+      background: var(--ink);
+      color: var(--sand);
+      padding: 72px 72px 36px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 56px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid rgba(247,243,236,.07);
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 300;
+      letter-spacing: .22em;
+      color: var(--sand);
+      margin-bottom: 14px;
+    }
+    .footer-brand-sub {
+      font-size: 12px;
+      font-weight: 300;
+      color: rgba(247,243,236,.38);
+      line-height: 1.8;
+      max-width: 240px;
+    }
+    .footer-col-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 22px;
+    }
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    .footer-links a {
+      font-size: 13px;
+      font-weight: 300;
+      color: rgba(247,243,236,.4);
+      transition: color var(--dur);
+      cursor: pointer;
+    }
+    .footer-links a:hover { color: var(--gold-light); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-copy {
+      font-size: 11px;
+      font-weight: 300;
+      color: rgba(247,243,236,.22);
+      letter-spacing: .07em;
+    }
+    .footer-accent {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(181,144,42,.45);
+    }
+    .footer-accent::before {
+      content: '';
+      display: block;
+      width: 36px; height: 1px;
+      background: var(--gold);
+    }
+
+    /* ═══════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: var(--sand);
+      padding: 14px 28px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      opacity: 0;
+      transition: all .3s var(--ease);
+      z-index: 9000;
+      pointer-events: none;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--gold);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-visual { height: 55vh; }
+      .hero-visual-overlay {
+        background: linear-gradient(180deg, var(--warm-white) 0%, transparent 30%);
+      }
+      .hero-content { padding: 140px 48px 60px; }
+      .hero-decor { right: 48px; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+      .about-band { grid-template-columns: 1fr; }
+      .about-img { aspect-ratio: 16/9; }
+      .footer-top { grid-template-columns: 1fr; gap: 40px; }
+      .section { padding: 80px 48px; }
+      .about-band { padding: 80px 48px; }
+    }
+    @media (max-width: 768px) {
+      .navbar { padding: 0 20px; }
+      .nav-links { display: none; }
+      .section { padding: 64px 20px; }
+      .hero-content { padding: 120px 20px 50px; }
+      .about-band { padding: 64px 20px; }
+      .footer { padding: 56px 20px 28px; }
+      .hero-decor { right: 20px; }
+      .products-grid { grid-template-columns: 1fr; }
+      .cart-drawer { width: 100%; }
+      .modal-body, .modal-head { padding-left: 22px; padding-right: 22px; }
+      .form-row { grid-template-columns: 1fr; }
+      .about-stats { flex-direction: column; gap: 24px; }
+    }
+  </style>
+
 </head>
 
 <body>
 
-<div id="authScreen" class="container">
-    <div class="card">
-        <h2 style="color:#ff7139;text-align:center;">🦊 DevFox</h2>
-        <input type="text" id="authUsername" placeholder="Username">
-        <input type="password" id="authPassword" placeholder="Password">
-        <button onclick="signup()">Sign Up</button>
-        <button onclick="login()">Login</button>
+  <!-- ══════════════════════════════════
+       LOADING SCREEN
+  ══════════════════════════════════ -->
+
+  <div id="loading-screen">
+    <div class="loading-logo">ZENOVA</div>
+    <div class="loading-bar"></div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════ -->
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">ZENOVA</div>
+
+```
+<ul class="nav-links" id="navLinks">
+  <li><a href="#home" data-key="navHome">الرئيسية</a></li>
+  <li><a href="#collection" data-key="navCollection">المجموعة</a></li>
+  <li><a href="#about" data-key="navAbout">قصتنا</a></li>
+</ul>
+
+<div class="nav-actions">
+  <div class="lang-toggle">
+    <button data-lang-btn="ar" class="active" onclick="setLang('ar')">AR</button>
+    <button data-lang-btn="en" onclick="setLang('en')">EN</button>
+    <button data-lang-btn="tr" onclick="setLang('tr')">TR</button>
+    <button data-lang-btn="ku" onclick="setLang('ku')">KU</button>
+  </div>
+  <button class="cart-trigger" onclick="openCart()" aria-label="السلة">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <path d="M16 10a4 4 0 0 1-8 0"/>
+    </svg>
+    <span class="cart-badge" id="cartBadge">0</span>
+  </button>
+</div>
+```
+
+  </nav>
+
+  <!-- ══════════════════════════════════
+       HERO
+  ══════════════════════════════════ -->
+
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-eyebrow" data-key="heroEyebrow">زينوفا — عطور 2024</div>
+      <h1 class="hero-title" data-key="heroTitle">
+        فن <em>الحضور</em><br>الاستثنائي
+      </h1>
+      <p class="hero-sub" data-key="heroSub">
+        تركيبات نادرة لمن يمشون في العالم بطريقتهم الخاصة. كل عطر قصة، كل رائحة هوية.
+      </p>
+      <a href="#collection" class="hero-cta" data-key="heroCta">
+        اكتشف المجموعة
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </a>
+      <div class="hero-decor" data-key="heroDecor">نادر · راقٍ · لا يُنسى</div>
     </div>
-</div>
-
-<div id="app" style="display:none;">
-<header>
-    <div class="logo">🦊 DevFox</div>
-    <div>
-        <span id="currentUser"></span>
-        <button onclick="logout()">Logout</button>
+    <div class="hero-visual">
+      <img
+        src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1200&q=85"
+        alt="Zenova Perfume"
+        loading="eager"
+      />
+      <div class="hero-visual-overlay"></div>
     </div>
-</header>
+  </section>
 
-<div class="container">
+  <div class="gold-rule"></div>
 
-<div class="card">
-<textarea id="postContent" placeholder="Share something... Use #hashtags"></textarea>
+  <!-- ══════════════════════════════════
+       COLLECTION
+  ══════════════════════════════════ -->
 
-<select id="category">
-<option>Web</option>
-<option>AI</option>
-<option>Swift</option>
-<option>Roblox</option>
-</select>
+  <section class="section" id="collection">
+    <div class="section-header">
+      <div class="section-eyebrow" data-key="collEyebrow">زينوفا ميزون</div>
+      <h2 class="section-title" data-key="collTitle">المجموعة الكاملة</h2>
+      <p class="section-sub" data-key="collSub">كل عطر فصل — لحظة مقطرة في رائحة تبقى على الجلد وفي الذاكرة.</p>
+    </div>
 
-<button onclick="addPost()">Post</button>
-</div>
+```
+<div class="products-grid">
 
-<div id="posts"></div>
+  <!-- Product 1: Zenova Bloom -->
+  <div class="product-card" data-observe>
+    <div class="product-img-wrap">
+      <img
+        src="https://images.unsplash.com/photo-1541643600914-78b084683702?w=700&q=80"
+        alt="Zenova Bloom"
+        loading="lazy"
+      />
+      <div class="product-overlay">
+        <button
+          class="product-add-btn"
+          data-id="bloom"
+          data-name="Zenova Bloom"
+          data-price="450"
+          data-img="https://images.unsplash.com/photo-1541643600914-78b084683702?w=700&q=80"
+          data-key-btn="addToCart"
+          onclick="addToCart(this)"
+        >
+          أضف إلى السلة
+        </button>
+      </div>
+    </div>
+    <div class="product-body">
+      <div class="product-notes">
+        <span class="note-tag">زهرة البرتقال</span>
+        <span class="note-tag">المسك الأبيض</span>
+        <span class="note-tag">الياسمين</span>
+      </div>
+      <div class="product-name">Zenova Bloom</div>
+      <div class="product-desc" data-key="bloomDesc">
+        عطر زهري طازج يمزج بين نضارة الصباح وعمق الأنوثة — يبقى على بشرتك كأنه جزء منك.
+      </div>
+      <div class="product-price">٤٥٠ ر.س</div>
+    </div>
+  </div>
 
-</div>
-</div>
+  <!-- Product 2: Zenova Earth -->
+  <div class="product-card" data-observe>
+    <div class="product-img-wrap">
+      <img
+        src="https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=700&q=80"
+        alt="Zenova Earth"
+        loading="lazy"
+      />
+      <div class="product-overlay">
+        <button
+          class="product-add-btn"
+          data-id="earth"
+          data-name="Zenova Earth"
+          data-price="520"
+          data-img="https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=700&q=80"
+          data-key-btn="addToCart"
+          onclick="addToCart(this)"
+        >
+          أضف إلى السلة
+        </button>
+      </div>
+    </div>
+    <div class="product-body">
+      <div class="product-notes">
+        <span class="note-tag">العود</span>
+        <span class="note-tag">الصندل</span>
+        <span class="note-tag">العنبر</span>
+      </div>
+      <div class="product-name">Zenova Earth</div>
+      <div class="product-desc" data-key="earthDesc">
+        رحلة إلى أعماق الأرض — عطر ترابي دافئ مع لمسة من خشب الصندل الفاخر والعود الشرقي الأصيل.
+      </div>
+      <div class="product-price">٥٢٠ ر.س</div>
+    </div>
+  </div>
 
-<script>
-let users = JSON.parse(localStorage.getItem("devfoxUsers")) || [];
-let posts = JSON.parse(localStorage.getItem("devfoxPosts")) || [];
-let currentUser = localStorage.getItem("devfoxCurrentUser");
-
-function saveAll() {
-localStorage.setItem("devfoxUsers", JSON.stringify(users));
-localStorage.setItem("devfoxPosts", JSON.stringify(posts));
-localStorage.setItem("devfoxCurrentUser", currentUser);
-}
-
-/* AUTH */
-
-function signup() {
-const username = authUsername.value.trim();
-const password = authPassword.value.trim();
-
-if(!username || !password) return alert("Fill fields");
-
-if(users.find(u => u.username === username))
-return alert("Username exists");
-
-users.push({ username, password, rank: "New Dev" });
-currentUser = username;
-saveAll();
-startApp();
-}
-
-function login() {
-const username = authUsername.value.trim();
-const password = authPassword.value.trim();
-
-const user = users.find(u => u.username === username && u.password === password);
-if(!user) return alert("Invalid login");
-
-currentUser = username;
-saveAll();
-startApp();
-}
-
-function logout() {
-currentUser = null;
-localStorage.removeItem("devfoxCurrentUser");
-location.reload();
-}
-
-/* START */
-
-function startApp() {
-authScreen.style.display = "none";
-app.style.display = "block";
-currentUserDisplay();
-renderPosts();
-}
-
-function currentUserDisplay(){
-const user = users.find(u=>u.username===currentUser);
-currentUserSpan = document.getElementById("currentUser");
-currentUserSpan.innerText = "@" + currentUser + " ("+user.rank+")";
-}
-
-/* POSTS */
-
-function addPost(){
-const content = postContent.value.trim();
-const category = document.getElementById("category").value;
-if(!content) return;
-
-posts.unshift({
-id: Date.now(),
-author: currentUser,
-content,
-category,
-likes: 0,
-comments: [],
-timestamp: Date.now()
-});
-
-updateRank();
-postContent.value="";
-saveAll();
-renderPosts();
-}
-
-function likePost(id){
-const post = posts.find(p=>p.id===id);
-post.likes++;
-saveAll();
-renderPosts();
-}
-
-function addComment(id){
-const input = document.getElementById("comment-"+id);
-if(!input.value) return;
-
-const post = posts.find(p=>p.id===id);
-post.comments.push({
-user: currentUser,
-text: input.value
-});
-
-input.value="";
-saveAll();
-renderPosts();
-}
-
-/* RANK SYSTEM */
-
-function updateRank(){
-const userPosts = posts.filter(p=>p.author===currentUser).length;
-const user = users.find(u=>u.username===currentUser);
-
-if(userPosts > 10) user.rank="Senior Dev";
-else if(userPosts > 5) user.rank="Active Dev";
-else user.rank="New Dev";
-
-saveAll();
-}
-
-/* TRENDING (sort by likes) */
-
-function renderPosts(){
-const container = document.getElementById("posts");
-container.innerHTML="";
-
-let sorted = [...posts].sort((a,b)=>b.likes - a.likes);
-
-sorted.forEach(post=>{
-container.innerHTML+=`
-<div class="post">
-<div class="small">@${post.author} • ${post.category}</div>
-<div>${highlightHashtags(post.content)}</div>
-<div class="small">🔥 ${post.likes} likes</div>
-<button onclick="likePost(${post.id})">Like</button>
-
-<div style="margin-top:10px;">
-<input id="comment-${post.id}" placeholder="Comment...">
-<button onclick="addComment(${post.id})">Add</button>
-${post.comments.map(c=>`<div class="small">@${c.user}: ${c.text}</div>`).join("")}
-</div>
+  <!-- Product 3: Zenova Dusk -->
+  <div class="product-card" data-observe>
+    <div class="product-img-wrap">
+      <img
+        src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=700&q=80"
+        alt="Zenova Dusk"
+        loading="lazy"
+      />
+      <div class="product-overlay">
+        <button
+          class="product-add-btn"
+          data-id="dusk"
+          data-name="Zenova Dusk"
+          data-price="490"
+          data-img="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=700&q=80"
+          data-key-btn="addToCart"
+          onclick="addToCart(this)"
+        >
+          أضف إلى السلة
+        </button>
+      </div>
+    </div>
+    <div class="product-body">
+      <div class="product-notes">
+        <span class="note-tag">البخور</span>
+        <span class="note-tag">الجلد</span>
+        <span class="note-tag">المر</span>
+      </div>
+      <div class="product-name">Zenova Dusk</div>
+      <div class="product-desc" data-key="duskDesc">
+        عطر الغسق الغامض — يجمع بين البخور الراتنجي والجلد الدافئ في توليفة لا تُنسى ليلةً بعد ليلة.
+      </div>
+      <div class="product-price">٤٩٠ ر.س</div>
+    </div>
+  </div>
 
 </div>
-`;
-});
-}
+```
 
-/* HASHTAG STYLE */
+  </section>
 
-function highlightHashtags(text){
-return text.replace(/#(\w+)/g,'<span style="color:#ff7139;">#$1</span>');
-}
+  <div class="gold-rule"></div>
 
-/* AUTO LOGIN */
+  <!-- ══════════════════════════════════
+       ABOUT
+  ══════════════════════════════════ -->
 
-if(currentUser){
-startApp();
-}
-</script>
+  <section class="about-band" id="about">
+    <div class="about-img" data-observe>
+      <img
+        src="https://images.unsplash.com/photo-1547005327-5ec87f45e28a?w=900&q=80"
+        alt="About Zenova"
+        loading="lazy"
+      />
+    </div>
+    <div class="about-content" data-observe>
+      <div class="about-eyebrow" data-key="aboutEyebrow">قصتنا</div>
+      <h2 class="about-title" data-key="aboutTitle">روح الشرق في كل قطرة</h2>
+      <p class="about-text" data-key="aboutText">
+        وُلدت زينوفا من ملتقى الشرق والغرب — مستلهمةً من الأسواق العريقة والحدائق البرية والمواد الخام النادرة.
+        كل زجاجة تحتضن رحلةً بين الصمت والإحساس، بين التقليد والابتكار.
+        نحن لا نبيع عطراً، بل نمنحك حضوراً.
+      </p>
+      <div class="about-stats">
+        <div>
+          <div class="stat-num">48+</div>
+          <div class="stat-label" data-key="statMat">مادة خام</div>
+        </div>
+        <div>
+          <div class="stat-num">12</div>
+          <div class="stat-label" data-key="statScent">عطراً</div>
+        </div>
+        <div>
+          <div class="stat-num">6</div>
+          <div class="stat-label" data-key="statCountry">دول</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       FOOTER
+  ══════════════════════════════════ -->
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">ZENOVA</div>
+        <div class="footer-brand-sub" data-key="footerTagline">
+          عطور فاخرة من قلب الشرق — لمن يعرفون قيمة الحضور الحقيقي.
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title" data-key="footerNav">التنقل</div>
+        <ul class="footer-links">
+          <li><a href="#home" data-key="navHome">الرئيسية</a></li>
+          <li><a href="#collection" data-key="navCollection">المجموعة</a></li>
+          <li><a href="#about" data-key="navAbout">قصتنا</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title" data-key="footerSupport">الدعم</div>
+        <ul class="footer-links">
+          <li><a data-key="footerShipping">الشحن والإرجاع</a></li>
+          <li><a data-key="footerFaq">الأسئلة الشائعة</a></li>
+          <li><a data-key="footerContact">تواصل معنا</a></li>
+          <li><a data-key="footerPrivacy">سياسة الخصوصية</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy" data-key="footerCopy">© 2024 زينوفا ميزون. جميع الحقوق محفوظة.</div>
+      <div class="footer-accent" data-key="footerAccent">عطور يدوية فاخرة</div>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════
+       CART DRAWER
+  ══════════════════════════════════ -->
+
+  <div class="cart-backdrop" id="cartBackdrop" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-head">
+      <div class="cart-head-title" data-key="cartTitle">اختيارك</div>
+      <button class="cart-close" onclick="closeCart()">×</button>
+    </div>
+    <div class="cart-body" id="cartBody">
+      <!-- populated by JS -->
+    </div>
+    <div class="cart-foot" id="cartFoot" style="display:none;">
+      <div class="cart-total-row">
+        <span class="cart-total-label" data-key="cartSubtotal">الإجمالي</span>
+        <span class="cart-total-val" id="cartTotal">٠ ر.س</span>
+      </div>
+      <button class="checkout-btn" data-key="checkoutBtn" onclick="openPayment()">
+        المتابعة للدفع
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       PAYMENT MODAL
+  ══════════════════════════════════ -->
+
+  <div class="modal-backdrop" id="paymentBackdrop">
+    <div class="payment-modal" id="paymentModal">
+      <div class="modal-head">
+        <div class="modal-title" data-key="payTitle">أكمل طلبك</div>
+        <button class="modal-close" onclick="closePayment()">×</button>
+      </div>
+      <div class="modal-body">
+
+```
+    <!-- Customer info -->
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" data-key="fieldName">الاسم الكامل</label>
+        <input class="form-input" id="custName" type="text" placeholder="" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-key="fieldEmail">البريد الإلكتروني</label>
+        <input class="form-input" id="custEmail" type="email" placeholder="" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group full">
+        <label class="form-label" data-key="fieldPhone">رقم الجوال</label>
+        <input class="form-input" id="custPhone" type="tel" placeholder="" />
+      </div>
+    </div>
+
+    <!-- Payment method -->
+    <div class="payment-divider" data-key="payMethodLabel">طريقة الدفع</div>
+
+    <div class="payment-options">
+      <button class="pay-option" data-method="card" onclick="selectPayment(this)">
+        <div class="pay-icon visa">💳</div>
+        <div class="pay-info">
+          <div class="pay-name" data-key="payCard">فيزا / ماستركارد</div>
+          <div class="pay-desc" data-key="payCardDesc">بطاقات الائتمان والخصم المباشر</div>
+        </div>
+        <div class="pay-radio"><div class="pay-radio-dot"></div></div>
+      </button>
+      <button class="pay-option" data-method="paypal" onclick="selectPayment(this)">
+        <div class="pay-icon paypal">🅿️</div>
+        <div class="pay-info">
+          <div class="pay-name">PayPal</div>
+          <div class="pay-desc" data-key="payPalDesc">دفع آمن وسريع عبر PayPal</div>
+        </div>
+        <div class="pay-radio"><div class="pay-radio-dot"></div></div>
+      </button>
+      <button class="pay-option" data-method="local" onclick="selectPayment(this)">
+        <div class="pay-icon local">🏦</div>
+        <div class="pay-info">
+          <div class="pay-name" data-key="payLocal">زين كاش / آسيا باي</div>
+          <div class="pay-desc" data-key="payLocalDesc">بوابة الدفع المحلية — العراق والخليج</div>
+        </div>
+        <div class="pay-radio"><div class="pay-radio-dot"></div></div>
+      </button>
+    </div>
+
+    <!-- Order summary -->
+    <div class="modal-summary">
+      <div class="modal-summary-title" data-key="orderSummary">ملخص الطلب</div>
+      <div id="modalSummaryLines"></div>
+      <div class="summary-total">
+        <span class="summary-total-label" data-key="orderTotal">الإجمالي</span>
+        <span class="summary-total-val" id="modalTotal">٠ ر.س</span>
+      </div>
+    </div>
+
+    <button class="place-order-btn" id="placeOrderBtn" data-key="placeOrder" onclick="placeOrder()" disabled>
+      تأكيد الطلب
+    </button>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ══════════════════════════════════
+       SUCCESS MODAL
+  ══════════════════════════════════ -->
+
+  <div class="modal-backdrop" id="successBackdrop">
+    <div class="success-modal">
+      <div class="success-check">✓</div>
+      <div class="success-eyebrow" data-key="successEyebrow">زينوفا ميزون</div>
+      <h2 class="success-title" data-key="successTitle">تم تأكيد طلبك</h2>
+      <p class="success-text" data-key="successText">
+        شكراً لثقتك بزينوفا. سيصلك تأكيد الطلب على بريدك الإلكتروني خلال دقائق.
+      </p>
+      <div class="success-order" id="successOrderNum"></div>
+      <button class="success-continue" data-key="successContinue" onclick="closeSuccess()">
+        مواصلة التسوق
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       TOAST
+  ══════════════════════════════════ -->
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ══════════════════════════════════
+       JAVASCRIPT
+  ══════════════════════════════════ -->
+
+  <script>
+    /* ────────────────────────────────────
+       TRANSLATIONS
+    ──────────────────────────────────── */
+    /* ─────────────────────────────────────────────────────────────────────
+       LANGS — scalable translation map.
+       To add a language: add a new key with the same shape, then add a
+       <button data-lang-btn="XX" onclick="setLang('XX')"> in the navbar.
+    ───────────────────────────────────────────────────────────────────── */
+    const LANGS = {
+
+      /* ── ARABIC (default, RTL) ── */
+      ar: {
+        dir: 'rtl', htmlLang: 'ar',
+        navHome: 'الرئيسية', navCollection: 'المجموعة', navAbout: 'قصتنا',
+        heroEyebrow: 'زينوفا — عطور 2024',
+        heroTitle: 'فن <em>الحضور</em><br>الاستثنائي',
+        heroSub: 'تركيبات نادرة لمن يمشون في العالم بطريقتهم الخاصة. كل عطر قصة، كل رائحة هوية.',
+        heroCta: 'اكتشف المجموعة',
+        heroDecor: 'نادر · راقٍ · لا يُنسى',
+        collEyebrow: 'زينوفا ميزون', collTitle: 'المجموعة الكاملة',
+        collSub: 'كل عطر فصل — لحظة مقطرة في رائحة تبقى على الجلد وفي الذاكرة.',
+        addToCart: 'أضف إلى السلة', addedToCart: '✓ تمت الإضافة',
+        bloomDesc: 'عطر زهري طازج يمزج بين نضارة الصباح وعمق الأنوثة — يبقى على بشرتك كأنه جزء منك.',
+        earthDesc: 'رحلة إلى أعماق الأرض — عطر ترابي دافئ مع لمسة من خشب الصندل الفاخر والعود الشرقي الأصيل.',
+        duskDesc: 'عطر الغسق الغامض — يجمع بين البخور الراتنجي والجلد الدافئ في توليفة لا تُنسى ليلةً بعد ليلة.',
+        aboutEyebrow: 'قصتنا', aboutTitle: 'روح الشرق في كل قطرة',
+        aboutText: 'وُلدت زينوفا من ملتقى الشرق والغرب — مستلهمةً من الأسواق العريقة والحدائق البرية والمواد الخام النادرة. كل زجاجة تحتضن رحلةً بين الصمت والإحساس، بين التقليد والابتكار. نحن لا نبيع عطراً، بل نمنحك حضوراً.',
+        statMat: 'مادة خام', statScent: 'عطراً', statCountry: 'دول',
+        cartTitle: 'اختيارك', cartSubtotal: 'الإجمالي', checkoutBtn: 'المتابعة للدفع',
+        cartEmpty: 'سلتك فارغة', cartEmptySub: 'اكتشف عطورنا الاستثنائية',
+        removeBtn: 'إزالة',
+        payTitle: 'أكمل طلبك',
+        fieldName: 'الاسم الكامل', fieldEmail: 'البريد الإلكتروني', fieldPhone: 'رقم الجوال',
+        payMethodLabel: 'طريقة الدفع',
+        payCard: 'فيزا / ماستركارد', payCardDesc: 'بطاقات الائتمان والخصم المباشر',
+        payPalDesc: 'دفع آمن وسريع عبر PayPal',
+        payLocal: 'زين كاش / آسيا باي', payLocalDesc: 'بوابة الدفع المحلية — العراق والخليج',
+        orderSummary: 'ملخص الطلب', orderTotal: 'الإجمالي', placeOrder: 'تأكيد الطلب',
+        successEyebrow: 'زينوفا ميزون', successTitle: 'تم تأكيد طلبك',
+        successText: 'شكراً لثقتك بزينوفا. سيصلك تأكيد الطلب على بريدك الإلكتروني خلال دقائق.',
+        successContinue: 'مواصلة التسوق',
+        footerTagline: 'عطور فاخرة من قلب الشرق — لمن يعرفون قيمة الحضور الحقيقي.',
+        footerNav: 'التنقل', footerSupport: 'الدعم',
+        footerShipping: 'الشحن والإرجاع', footerFaq: 'الأسئلة الشائعة',
+        footerContact: 'تواصل معنا', footerPrivacy: 'سياسة الخصوصية',
+        footerCopy: '© 2024 زينوفا ميزون. جميع الحقوق محفوظة.', footerAccent: 'عطور يدوية فاخرة',
+        toastAdded: 'تمت إضافة العطر إلى سلتك ✓',
+        orderNumLabel: 'رقم الطلب',
+        currencyFmt: v => formatArabicNum(v) + ' ر.س',
+      },
+
+      /* ── ENGLISH (LTR) ── */
+      en: {
+        dir: 'ltr', htmlLang: 'en',
+        navHome: 'Home', navCollection: 'Collection', navAbout: 'Our Story',
+        heroEyebrow: 'Zenova — Fine Perfumery 2024',
+        heroTitle: 'The Art of <em>Presence</em>',
+        heroSub: 'Rare compositions for those who move through the world differently. Each scent is a story.',
+        heroCta: 'Explore Collection',
+        heroDecor: 'Rare · Refined · Unforgettable',
+        collEyebrow: 'Zenova Maison', collTitle: 'The Collection',
+        collSub: 'Each fragrance is a chapter — a moment distilled into scent that stays with you.',
+        addToCart: 'Add to Cart', addedToCart: '✓ Added',
+        bloomDesc: 'A fresh floral that blends morning freshness with deep femininity — it stays on your skin as if it belongs there.',
+        earthDesc: "A journey to the earth's depths — warm, woody, with precious sandalwood and authentic oriental oud.",
+        duskDesc: 'The mysterious dusk fragrance — resinous incense and warm leather in an unforgettable blend, night after night.',
+        aboutEyebrow: 'Our Story', aboutTitle: 'The Spirit of the East in Every Drop',
+        aboutText: "Zenova was born at the crossroads of East and West — inspired by ancient markets, wild gardens, and rare raw materials. Each bottle holds a journey between silence and sensation, between tradition and innovation. We don't sell a fragrance; we give you a presence.",
+        statMat: 'Raw Materials', statScent: 'Fragrances', statCountry: 'Countries',
+        cartTitle: 'Your Selection', cartSubtotal: 'Subtotal', checkoutBtn: 'Proceed to Checkout',
+        cartEmpty: 'Your cart is empty', cartEmptySub: 'Discover our extraordinary fragrances',
+        removeBtn: 'Remove',
+        payTitle: 'Complete Your Order',
+        fieldName: 'Full Name', fieldEmail: 'Email Address', fieldPhone: 'Phone Number',
+        payMethodLabel: 'Payment Method',
+        payCard: 'Visa / Mastercard', payCardDesc: 'Credit & debit cards accepted',
+        payPalDesc: 'Fast, secure PayPal checkout',
+        payLocal: 'ZainCash / AsiaPay', payLocalDesc: 'Local payment gateway — Iraq & Gulf',
+        orderSummary: 'Order Summary', orderTotal: 'Total', placeOrder: 'Place Order',
+        successEyebrow: 'Zenova Maison', successTitle: 'Order Confirmed',
+        successText: 'Thank you for trusting Zenova. A confirmation will be sent to your email shortly.',
+        successContinue: 'Continue Shopping',
+        footerTagline: 'Luxury perfumes from the heart of the East — for those who know the value of true presence.',
+        footerNav: 'Navigation', footerSupport: 'Support',
+        footerShipping: 'Shipping & Returns', footerFaq: 'FAQ',
+        footerContact: 'Contact Us', footerPrivacy: 'Privacy Policy',
+        footerCopy: '© 2024 Zenova Maison. All rights reserved.', footerAccent: 'Handcrafted Luxury',
+        toastAdded: 'Fragrance added to your cart ✓',
+        orderNumLabel: 'Order No.',
+        currencyFmt: v => 'SAR ' + v,
+      },
+
+      /* ── TURKISH (LTR) ── */
+      tr: {
+        dir: 'ltr', htmlLang: 'tr',
+        navHome: 'Ana Sayfa', navCollection: 'Koleksiyon', navAbout: 'Hikayemiz',
+        heroEyebrow: 'Zenova — İnce Parfümeri 2024',
+        heroTitle: 'Varoluşun <em>Sanatı</em>',
+        heroSub: 'Dünyayı farklı yaşayanlar için nadir kompozisyonlar. Her koku bir hikaye, her esans bir kimlik.',
+        heroCta: 'Koleksiyonu Keşfet',
+        heroDecor: 'Nadir · Zarif · Unutulmaz',
+        collEyebrow: 'Zenova Maison', collTitle: 'Koleksiyon',
+        collSub: 'Her parfüm bir bölüm — cildinizde ve belleğinizde kalan, kokuya damıtılmış bir an.',
+        addToCart: 'Sepete Ekle', addedToCart: '✓ Eklendi',
+        bloomDesc: 'Sabahın tazeliğini derin feminilikle harmanlayan çiçeksi bir parfüm — cildinizde sanki hep oraya aitmiş gibi kalır.',
+        earthDesc: "Toprağın derinliklerine bir yolculuk — sıcak, odunsu; değerli sandal ağacı ve otantik oryantal oudla.",
+        duskDesc: 'Gizemli alacakaranlık kokusu — reçineli tütsü ve sıcak deri, gece gece unutulmaz bir harmanda buluşur.',
+        aboutEyebrow: 'Hikayemiz', aboutTitle: 'Her Damla­da Doğu\'nun Ruhu',
+        aboutText: "Zenova, Doğu ile Batı'nın kesiştiği noktada doğdu; antik çarşılardan, vahşi bahçelerden ve nadir hammaddelerden ilham aldı. Her şişe; sessizlik ile duygu, gelenek ile yenilik arasındaki bir yolculuğu barındırır. Biz bir parfüm satmıyoruz; size bir varlık sunuyoruz.",
+        statMat: 'Ham Madde', statScent: 'Parfüm', statCountry: 'Ülke',
+        cartTitle: 'Seçiminiz', cartSubtotal: 'Ara Toplam', checkoutBtn: 'Ödemeye Geç',
+        cartEmpty: 'Sepetiniz boş', cartEmptySub: 'Olağanüstü parfümlerimizi keşfedin',
+        removeBtn: 'Kaldır',
+        payTitle: 'Siparişinizi Tamamlayın',
+        fieldName: 'Ad Soyad', fieldEmail: 'E-posta Adresi', fieldPhone: 'Telefon Numarası',
+        payMethodLabel: 'Ödeme Yöntemi',
+        payCard: 'Visa / Mastercard', payCardDesc: 'Kredi ve banka kartları kabul edilir',
+        payPalDesc: "Hızlı ve güvenli PayPal ödemesi",
+        payLocal: 'ZainCash / AsiaPay', payLocalDesc: 'Yerel ödeme ağ geçidi — Irak ve Körfez',
+        orderSummary: 'Sipariş Özeti', orderTotal: 'Toplam', placeOrder: 'Siparişi Ver',
+        successEyebrow: 'Zenova Maison', successTitle: 'Siparişiniz Onaylandı',
+        successText: "Zenova'ya güvendiğiniz için teşekkürler. Kısa süre içinde e-postanıza onay gönderilecektir.",
+        successContinue: 'Alışverişe Devam Et',
+        footerTagline: "Doğu'nun kalbinden lüks parfümler — gerçek varlığın değerini bilenler için.",
+        footerNav: 'Gezinme', footerSupport: 'Destek',
+        footerShipping: 'Kargo ve İadeler', footerFaq: 'Sık Sorulan Sorular',
+        footerContact: 'Bize Ulaşın', footerPrivacy: 'Gizlilik Politikası',
+        footerCopy: '© 2024 Zenova Maison. Tüm hakları saklıdır.', footerAccent: 'El Yapımı Lüks',
+        toastAdded: 'Parfüm sepetinize eklendi ✓',
+        orderNumLabel: 'Sipariş No.',
+        currencyFmt: v => 'SAR ' + v,
+      },
+
+      /* ── KURDISH / SORANI (RTL) ── */
+      ku: {
+        dir: 'rtl', htmlLang: 'ku',
+        navHome: 'سەرەکی', navCollection: 'کۆلێکشن', navAbout: 'چیرۆکەکەمان',
+        heroEyebrow: 'زێنۆڤا — بۆنی باشیر ٢٠٢٤',
+        heroTitle: 'هونەری <em>ئامادەبوون</em>',
+        heroSub: 'تەرکیبە کەمیابەکان بۆ ئەوانەی بە شێوەیەکی جیاواز ژیانیان دەکەن. هەر بۆنێک چیرۆکێکە.',
+        heroCta: 'کۆلێکشن بگەڕێ',
+        heroDecor: 'کەمیاب · نازدار · بەیادنەماو',
+        collEyebrow: 'زێنۆڤا مەیزۆن', collTitle: 'کۆلێکشنی تەواو',
+        collSub: 'هەر بۆنێک بەشێکە — کاتێک کە لە بۆنی دەچکێنرێت و لەسەر چەرم و بیرت دەمێنێتەوە.',
+        addToCart: 'زیادبکە بۆ سەبەتە', addedToCart: '✓ زیادکرا',
+        bloomDesc: 'بۆنی گوڵی تازە کە تازەبوونی بەیانی و کەوانەی ژنانە تێکەڵ دەکات — وەک بەشێک لە چەرمت پێدەمێنێتەوە.',
+        earthDesc: 'گەشتێک بۆ قوڵایی زەوی — گەرم، دارین، لەگەڵ داری سەندەلی بەنرخ و عوودی ئۆریەنتاڵی.',
+        duskDesc: 'بۆنی تاریکی شەوانە — بوخوری سیندارانە و چەرمی گەرم، شەوانە شەوانە بە تەرکیبێکی بەیادنەماو.',
+        aboutEyebrow: 'چیرۆکەکەمان', aboutTitle: 'ڕووحی ڕۆژهەڵات لە هەر دووپاتە',
+        aboutText: 'زێنۆڤا لە کەژبوونی ڕۆژهەڵات و ڕۆژئاوا لەدایکبوو — لە بازاڕە کۆنەکان، باخە کێوییەکان و کەرەستە کەمیابەکان ئیلهامی وەرگرت. هەر بوتل گەشتێک لە نێوان بێدەنگی و هەست، لە نێوان کۆن و نوێ دەگرێتەوە. ئێمە بۆنی نافرۆشین، ئامادەبوونت دەبەخشین.',
+        statMat: 'مادەی خام', statScent: 'بۆن', statCountry: 'وڵات',
+        cartTitle: 'هەڵبژاردنەکەت', cartSubtotal: 'کۆی گشتی', checkoutBtn: 'بڕۆ بۆ پارەدان',
+        cartEmpty: 'سەبەتەکەت بەتاڵە', cartEmptySub: 'بۆنە نایابەکانمان بگەڕێ',
+        removeBtn: 'لابردن',
+        payTitle: 'داواکارییەکەت تەواو بکە',
+        fieldName: 'ناوی تەواو', fieldEmail: 'ئیمەیڵ', fieldPhone: 'ژمارەی مۆبایل',
+        payMethodLabel: 'شێوازی پارەدان',
+        payCard: 'ڤیزا / ماسترکارد', payCardDesc: 'کارتی کرێدیت و دیرێکت قبوڵ دەکرێت',
+        payPalDesc: 'پارەدانی خێرا و پارێزراو بە PayPal',
+        payLocal: 'زەین کاش / ئەیشیاپەی', payLocalDesc: 'دەروازەی پارەدانی ناوخۆیی — عێراق و خەلیج',
+        orderSummary: 'پوختەی داواکاری', orderTotal: 'کۆی گشتی', placeOrder: 'داواکاری پشتڕاستبکەوە',
+        successEyebrow: 'زێنۆڤا مەیزۆن', successTitle: 'داواکارییەکەت پشتڕاستکرایەوە',
+        successText: 'سوپاس بۆ باوەڕت بە زێنۆڤا. بە زووترین کاتدا پشتڕاستکردنەوەیەک بۆ ئیمەیڵەکەت دەنێرین.',
+        successContinue: 'بەردەوام بە خرید',
+        footerTagline: 'بۆنی فاخر لە دڵی ڕۆژهەڵاتەوە — بۆ ئەوانەی بەهای ئامادەبوونی ڕاستەقینە دەزانن.',
+        footerNav: 'ناڤیگەیشن', footerSupport: 'پشتگیری',
+        footerShipping: 'ناردن و گەڕاندنەوە', footerFaq: 'پرسیارە باوەکان',
+        footerContact: 'پەیوەندیمان پێوە بکە', footerPrivacy: 'پۆلیسی تایبەتمەندی',
+        footerCopy: '© ٢٠٢٤ زێنۆڤا مەیزۆن. هەموو مافەکان پارێزراون.', footerAccent: 'بۆنی دەستی فاخر',
+        toastAdded: 'بۆنەکە زیادکرا بۆ سەبەتەکەت ✓',
+        orderNumLabel: 'ژمارەی داواکاری',
+        currencyFmt: v => formatArabicNum(v) + ' ر.س',
+      },
+
+    }; // ← end LANGS  (add new language block above this line)
+
+    let currentLang = localStorage.getItem('zenova-lang') || 'ar';
+
+    /* Convert Western digits → Arabic-Indic numerals (used by AR & KU) */
+    function formatArabicNum(n) {
+      return n.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    }
+
+    function setLang(code) {
+      /* Guard: ignore unknown codes */
+      if (!LANGS[code]) { console.warn('Zenova: unknown language code "' + code + '"'); return; }
+
+      currentLang = code;
+      localStorage.setItem('zenova-lang', code);
+      const L = LANGS[code];
+
+      /* 1. Document direction + lang attribute */
+      document.documentElement.lang = L.htmlLang;
+      document.documentElement.dir  = L.dir;
+
+      /* 2. Activate correct lang button (works for any code length) */
+      document.querySelectorAll('.lang-toggle button').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang-btn') === code);
+      });
+
+      /* 3. Translate all [data-key] elements in the static HTML */
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (L[key] !== undefined) el.innerHTML = L[key];
+      });
+
+      /* 4. Reset add-to-cart button labels (don't touch buttons mid-flash) */
+      document.querySelectorAll('.product-add-btn').forEach(btn => {
+        if (!btn.classList.contains('added')) btn.textContent = L.addToCart;
+      });
+
+      /* 5. Re-render dynamic JS sections */
+      renderCart();
+      renderPaymentSummary();
+    }
+
+    /* ────────────────────────────────────
+       CART STATE
+    ──────────────────────────────────── */
+    let cart = [];
+    try { cart = JSON.parse(localStorage.getItem('zenova-cart') || '[]'); } catch {}
+
+    function saveCart() {
+      localStorage.setItem('zenova-cart', JSON.stringify(cart));
+    }
+
+    function getTotal() {
+      return cart.reduce((s, i) => s + i.price * i.qty, 0);
+    }
+
+    function updateBadge() {
+      const total = cart.reduce((s, i) => s + i.qty, 0);
+      const badge = document.getElementById('cartBadge');
+      badge.textContent = total;
+      badge.classList.toggle('show', total > 0);
+    }
+
+    function addToCart(btn) {
+      const L  = LANGS[currentLang];
+      const id    = btn.getAttribute('data-id');
+      const name  = btn.getAttribute('data-name');
+      const price = parseInt(btn.getAttribute('data-price'));
+      const img   = btn.getAttribute('data-img');
+
+      const existing = cart.find(i => i.id === id);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ id, name, price, img, qty: 1 });
+      }
+      saveCart();
+      renderCart();
+      updateBadge();
+
+      // flash button
+      btn.classList.add('added');
+      btn.textContent = L.addedToCart;
+      setTimeout(() => {
+        btn.classList.remove('added');
+        btn.textContent = L.addToCart;
+      }, 1500);
+
+      showToast(L.toastAdded);
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+      saveCart();
+      renderCart();
+      updateBadge();
+      renderPaymentSummary();
+    }
+
+    function changeQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      item.qty = Math.max(1, item.qty + delta);
+      saveCart();
+      renderCart();
+      updateBadge();
+      renderPaymentSummary();
+    }
+
+    function renderCart() {
+      const L    = LANGS[currentLang];
+      const body = document.getElementById('cartBody');
+      const foot = document.getElementById('cartFoot');
+      const totalEl = document.getElementById('cartTotal');
+
+      if (cart.length === 0) {
+        body.innerHTML = `
+          <div class="cart-empty-state">
+            <div class="cart-empty-icon">◌</div>
+            <div class="cart-empty-title">${L.cartEmpty}</div>
+            <div class="cart-empty-sub">${L.cartEmptySub}</div>
+          </div>`;
+        foot.style.display = 'none';
+        return;
+      }
+
+      body.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <div class="cart-item-img">
+            <img src="${item.img}" alt="${item.name}" loading="lazy" />
+          </div>
+          <div>
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-price">${L.currencyFmt(item.price * item.qty)}</div>
+            <div class="qty-row">
+              <button class="qty-btn" onclick="changeQty('${item.id}', -1)">−</button>
+              <div class="qty-val">${item.qty}</div>
+              <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;">
+            <button class="remove-btn" onclick="removeFromCart('${item.id}')">${L.removeBtn}</button>
+          </div>
+        </div>`).join('');
+
+      totalEl.textContent = L.currencyFmt(getTotal());
+      foot.style.display = 'block';
+    }
+
+    /* ────────────────────────────────────
+       CART DRAWER
+    ──────────────────────────────────── */
+    function openCart() {
+      renderCart();
+      document.getElementById('cartBackdrop').classList.add('open');
+      document.getElementById('cartDrawer').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeCart() {
+      document.getElementById('cartBackdrop').classList.remove('open');
+      document.getElementById('cartDrawer').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    /* ────────────────────────────────────
+       PAYMENT MODAL
+    ──────────────────────────────────── */
+    let selectedPayMethod = null;
+
+    function selectPayment(btn) {
+      document.querySelectorAll('.pay-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedPayMethod = btn.getAttribute('data-method');
+      validatePaymentForm();
+    }
+
+    function validatePaymentForm() {
+      const name  = document.getElementById('custName').value.trim();
+      const email = document.getElementById('custEmail').value.trim();
+      const ok    = name && email && selectedPayMethod;
+      document.getElementById('placeOrderBtn').disabled = !ok;
+    }
+
+    function renderPaymentSummary() {
+      const L = LANGS[currentLang];
+      const lines = document.getElementById('modalSummaryLines');
+      const totalEl = document.getElementById('modalTotal');
+      if (!lines) return;
+      lines.innerHTML = cart.map(i =>
+        `<div class="summary-line">
+          <span>${i.name} ×${i.qty}</span>
+          <span>${L.currencyFmt(i.price * i.qty)}</span>
+        </div>`).join('');
+      totalEl.textContent = L.currencyFmt(getTotal());
+    }
+
+    function openPayment() {
+      if (cart.length === 0) return;
+      closeCart();
+      renderPaymentSummary();
+      selectedPayMethod = null;
+      document.querySelectorAll('.pay-option').forEach(b => b.classList.remove('selected'));
+      document.getElementById('placeOrderBtn').disabled = true;
+      // wire validation
+      ['custName','custEmail','custPhone'].forEach(id => {
+        document.getElementById(id).addEventListener('input', validatePaymentForm);
+      });
+      document.getElementById('paymentBackdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePayment() {
+      document.getElementById('paymentBackdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function placeOrder() {
+      if (!selectedPayMethod) return;
+      const name  = document.getElementById('custName').value.trim();
+      const email = document.getElementById('custEmail').value.trim();
+      if (!name || !email) return;
+
+      const L   = LANGS[currentLang];
+      const orderId = 'ZNV-' + Math.random().toString(36).slice(2,8).toUpperCase();
+
+      // save order
+      const orders = JSON.parse(localStorage.getItem('zenova-orders') || '[]');
+      orders.unshift({
+        id: orderId, customer: name, email,
+        items: [...cart], total: getTotal(),
+        payment: selectedPayMethod,
+        date: new Date().toLocaleDateString()
+      });
+      localStorage.setItem('zenova-orders', JSON.stringify(orders));
+
+      // clear cart
+      cart = [];
+      saveCart();
+      updateBadge();
+      renderCart();
+
+      // show success
+      closePayment();
+      document.getElementById('successOrderNum').textContent =
+        L.orderNumLabel + ': ' + orderId;
+      document.getElementById('successBackdrop').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSuccess() {
+      document.getElementById('successBackdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    /* ────────────────────────────────────
+       TOAST
+    ──────────────────────────────────── */
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    /* ────────────────────────────────────
+       SCROLL REVEAL
+    ──────────────────────────────────── */
+    function initReveal() {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('[data-observe]').forEach(el => obs.observe(el));
+    }
+
+    /* ────────────────────────────────────
+       NAVBAR SCROLL
+    ──────────────────────────────────── */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+    }, { passive: true });
+
+    /* ────────────────────────────────────
+       PAYMENT BACKDROP CLOSE ON OUTSIDE CLICK
+    ──────────────────────────────────── */
+    document.getElementById('paymentBackdrop').addEventListener('click', function(e) {
+      if (e.target === this) closePayment();
+    });
+    document.getElementById('successBackdrop').addEventListener('click', function(e) {
+      if (e.target === this) closeSuccess();
+    });
+
+    /* ────────────────────────────────────
+       INIT
+    ──────────────────────────────────── */
+    window.addEventListener('DOMContentLoaded', () => {
+      // loading screen
+      setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+      }, 1900);
+
+      // apply saved language
+      setLang(currentLang);
+      updateBadge();
+      initReveal();
+    });
+  </script>
 
 </body>
 </html>
