@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZENOVA — Luxury Perfumes</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600&family=Tajawal:wght@200;300;400;500&display=swap" rel="stylesheet" />
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebas
+ e-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════
+       ROOT & RESET
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0F0E0C; --charcoal: #1C1A17; --graphite: #2E2B26;
+      --sand: #F7F3EC; --parchment: #EEE8DC; --warm-white: #FAF8F4;
+      --gold: #B5902A; --gold-light: #D4AF6A; --gold-pale: #F2E7CB;
+      --mist: #8C887F; --fog: #C8C3BA; --error: #b94040;
+      --font-display: 'Playfair Display', serif;
+      --font-body: 'Tajawal', sans-serif;
+      --ease: cubic-bezier(.25,.46,.45,.94);
+      --dur: .38s;
+      --shadow-sm: 0 2px 20px rgba(15,14,12,.06);
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: var(--font-body); background: var(--warm-white); color: var(--ink); line-height: 1.65; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    img { display: block; max-width: 100%; }
+    button { cursor: pointer; font-family: inherit; border: none; outline: none; background: none; }
+    a { text-decoration: none; color: inherit; }
+
+    /* LOADING SCREEN */
+    #loading-screen { position: fixed; inset: 0; background: var(--ink); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; transition: opacity .6s ease; }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; }
+    .loading-logo { font-family: var(--font-display); font-size: 40px; letter-spacing: .35em; color: var(--sand); }
+
+    /* NAVBAR */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 900; height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: rgba(250,248,244,.93); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom: 1px solid rgba(181,144,42,.13); }
+    .nav-brand { font-family: var(--font-display); font-size: 26px; letter-spacing: .22em; }
+    .nav-links { display: flex; gap: 30px; }
+    .nav-links a { font-size: 13px; font-weight: 500; letter-spacing: 0.1em; color: var(--graphite); transition: .3s; }
+    .nav-links a:hover { color: var(--gold); }
+    .lang-toggle { display: flex; border: 1px solid rgba(181,144,42,.2); margin: 0 20px; }
+    .lang-toggle button { padding: 4px 10px; font-size: 11px; font-weight: bold; border-right: 1px solid rgba(181,144,42,0.1); color: var(--mist); }
+    .lang-toggle button:last-child { border: none; }
+    .lang-toggle button.active { background: var(--ink); color: var(--sand); }
+    .cart-trigger { position: relative; padding: 8px; }
+    .cart-badge { position: absolute; top: -2px; left: -2px; width: 18px; height: 18px; background: var(--gold); color: #fff; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; transform: scale(0); transition: .3s; }
+    .cart-badge.show { transform: scale(1); }
+
+    /* HERO */
+    .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+    .hero-content { display: flex; flex-direction: column; justify-content: center; padding: 80px 72px; }
+    .hero-eyebrow { font-size: 12px; letter-spacing: .3em; color: var(--gold); margin-bottom: 20px; text-transform: uppercase; }
+    .hero-title { font-family: var(--font-display); font-size: clamp(40px, 5vw, 70px); line-height: 1.1; margin-bottom: 24px; }
+    .hero-title em { font-style: italic; color: var(--gold); }
+    .hero-sub { color: var(--mist); margin-bottom: 40px; max-width: 400px; }
+    .hero-cta { padding: 18px 45px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; width: fit-content; transition: .3s; }
+    .hero-cta:hover { background: var(--gold); }
+    .hero-visual { position: relative; background: var(--parchment); overflow: hidden; }
+    .hero-visual img { width: 100%; height: 100%; object-fit: cover; }
+    .hero-visual-overlay { position: absolute; inset: 0; background: linear-gradient(270deg, transparent 55%, var(--warm-white) 100%); }
+
+    /* PRODUCTS */
+    .section { padding: 100px 72px; }
+    .section-header { text-align: center; margin-bottom: 60px; }
+    .section-title { font-family: var(--font-display); font-size: 40px; }
+    .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+    .product-card { background: #fff; transition: .4s; }
+    .product-img-wrap { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #f9f9f9; }
+    .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: .6s; }
+    .product-card:hover img { transform: scale(1.05); }
+    .product-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; align-items: flex-end; padding: 20px; transition: .3s; }
+    .product-card:hover .product-overlay { background: rgba(0,0,0,0.15); }
+    .product-add-btn { width: 100%; padding: 15px; background: var(--sand); font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0; transform: translateY(10px); transition: .3s; }
+    .product-card:hover .product-add-btn { opacity: 1; transform: translateY(0); }
+    .product-add-btn:hover { background: var(--gold); color: #fff; }
+    .product-body { padding: 25px 0; text-align: center; }
+    .product-name { font-family: var(--font-display); font-size: 22px; margin-bottom: 8px; }
+    .product-price { font-size: 18px; color: var(--gold); font-weight: 500; }
+
+    /* CART DRAWER */
+    .cart-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; opacity: 0; visibility: hidden; transition: .4s; }
+    .cart-backdrop.open { opacity: 1; visibility: visible; }
+    .cart-drawer { position: fixed; top: 0; bottom: 0; width: 420px; background: #fff; z-index: 1001; transition: transform .4s var(--ease); display: flex; flex-direction: column; }
+    [dir="ltr"] .cart-drawer { right: 0; transform: translateX(100%); }
+    [dir="rtl"] .cart-drawer { left: 0; transform: translateX(-100%); }
+    .cart-drawer.open { transform: translateX(0) !important; }
+    .cart-head { padding: 30px; border-bottom: 1px solid var(--parchment); display: flex; justify-content: space-between; align-items: center; }
+    .cart-body { flex: 1; overflow-y: auto; padding: 20px 30px; }
+    .cart-item { display: grid; grid-template-columns: 80px 1fr auto; gap: 15px; padding: 15px 0; border-bottom: 1px solid #f2f2f2; align-items: center; }
+    .cart-item-img { aspect-ratio: 1; overflow: hidden; border: 1px solid #eee; }
+    .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .cart-foot { padding: 30px; border-top: 1px solid #eee; }
+
+    /* PAYMENT MODAL */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: .3s; }
+    .modal-backdrop.open { opacity: 1; visibility: visible; }
+    .payment-modal { background: #fff; width: 90%; max-width: 500px; padding: 40px; border-radius: 4px; position: relative; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+    .form-input { width: 100%; padding: 14px; border: 1px solid var(--fog); font-family: inherit; }
+    .payment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+    .pay-option { padding: 15px; border: 1px solid var(--fog); text-align: center; transition: .3s; font-weight: 600; }
+    .pay-option.selected { border-color: var(--gold); background: var(--gold-pale); }
+    .place-order-btn { width: 100%; padding: 20px; background: var(--ink); color: #fff; font-weight: 700; text-transform: uppercase; margin-top: 25px; transition: .3s; }
+    .place-order-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 12px 30px; border-radius: 2px; opacity: 0; transition: .3s; z-index: 9999; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; }
+      .navbar { padding: 0 20px; }
+      .nav-links { display: none; }
+      .products-grid { grid-template-columns: 1fr; }
+      .section { padding: 60px 20px; }
+      .cart-drawer { width: 100%; }
+      .hero-content { padding: 120px 30px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading-screen">
+    <div class="loading-logo">ZENOVA</div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">ZENOVA</div>
+    
+    <ul class="nav-links">
+      <li><a href="#home" data-key="navHome"></a></li>
+      <li><a href="#collection" data-key="navCollection"></a></li>
+      <li><a href="#about" data-key="navAbout"></a></li>
+    </ul>
+
+    <div style="display: flex; align-items: center;">
+      <div class="lang-toggle">
+        <button data-lang-btn="ar" onclick="setLang('ar')">AR</button>
+        <button data-lang-btn="en" onclick="setLang('en')">EN</button>
+        <button data-lang-btn="tr" onclick="setLang('tr')">TR</button>
+        <button data-lang-btn="ku" onclick="setLang('ku')">KU</button>
+      </div>
+      <button class="cart-trigger" onclick="openCart()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-eyebrow" data-key="heroEyebrow"></div>
+      <h1 class="hero-title" data-key="heroTitle"></h1>
+      <p class="hero-sub" data-key="heroSub"></p>
+      <a href="#collection" class="hero-cta" data-key="heroCta"></a>
+    </div>
+    <div class="hero-visual">
+      <img src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1200" alt="Zenova">
+      <div class="hero-visual-overlay"></div>
+    </div>
+  </section>
+
+  <section class="section" id="collection">
+    <div class="section-header">
+      <h2 class="section-title" data-key="collTitle"></h2>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <!-- Products generated by JS -->
+    </div>
+  </section>
+
+  <div class="cart-backdrop" id="cartBackdrop" onclick="closeCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-head">
+      <h3 data-key="cartTitle"></h3>
+      <button onclick="closeCart()" style="font-size: 28px;">&times;</button>
+    </div>
+    <div class="cart-body" id="cartBody"></div>
+    <div class="cart-foot" id="cartFoot">
+      <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+        <span data-key="cartSubtotal"></span>
+        <strong id="cartTotalDisplay">0 IQD</strong>
+      </div>
+      <button class="place-order-btn" onclick="openPayment()" data-key="checkoutBtn"></button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="paymentBackdrop">
+    <div class="payment-modal">
+      <div style="display:flex; justify-content:space-between; margin-bottom:30px; align-items:center;">
+        <h3 data-key="payTitle"></h3>
+        <button onclick="closePayment()" style="font-size:24px">&times;</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-key="fieldName"></label>
+        <input type="text" id="custName" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-key="fieldPhone"></label>
+        <input type="tel" id="custPhone" class="form-input" placeholder="07xx xxx xxxx">
+      </div>
+      <label class="form-label" data-key="payMethodLabel"></label>
+      <div class="payment-options">
+        <button class="pay-option" onclick="selectMethod(this, 'ZainCash')">ZainCash</button>
+        <button class="pay-option" onclick="selectMethod(this, 'QiCard')">QiCard</button>
+        <button class="pay-option" onclick="selectMethod(this, 'AsiaPay')">AsiaPay</button>
+        <button class="pay-option" onclick="selectMethod(this, 'FastPay')">FastPay</button>
+      </div>
+      <button class="place-order-btn" id="confirmBtn" disabled onclick="handleFinalOrder()" data-key="placeOrder"></button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="footer" style="background:#000; color:#fff; padding:60px 40px; text-align:center;">
+    <div class="nav-brand" style="margin-bottom:20px">ZENOVA</div>
+    <p style="opacity:0.5; font-size:12px" data-key="footerCopy"></p>
+  </footer>
+
+  <script>
+    /* ────────────────────────────────────
+       CONFIGURATION
+    ──────────────────────────────────── */
+    const MERCHANT_PHONE = "9647723303336";
+    
+    const PRODUCTS = [
+      { id: 'p1', name: 'Zenova Bloom', price: 75000, img: 'https://images.unsplash.com/photo-1541643600914-78b084683702?w=700' },
+      { id: 'p2', name: 'Zenova Earth', price: 85000, img: 'https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=700' },
+      { id: 'p3', name: 'Zenova Dusk', price: 80000, img: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=700' }
+    ];
+
+    const LANGS = {
+      ar: {
+        dir: 'rtl',
+        navHome: 'الرئيسية', navCollection: 'المجموعة', navAbout: 'قصتنا',
+        heroEyebrow: 'زينوفا — عطور 2024',
+        heroTitle: 'فن <em>الحضور</em> الاستثنائي',
+        heroSub: 'تركيبات نادرة لمن يمشون في العالم بطريقتهم الخاصة.',
+        heroCta: 'اكتشف المجموعة',
+        collTitle: 'المجموعة الكاملة',
+        cartTitle: 'سلة التسوق',
+        cartSubtotal: 'الإجمالي الفرعي',
+        checkoutBtn: 'المتابعة للدفع',
+        addToCart: 'أضف إلى السلة',
+        payTitle: 'إكمال الطلب',
+        fieldName: 'الاسم الكامل',
+        fieldPhone: 'رقم الهاتف',
+        payMethodLabel: 'طريقة الدفع',
+        placeOrder: 'تأكيد وطلب عبر واتساب',
+        footerCopy: '© 2024 زينوفا ميزون. جميع الحقوق محفوظة.',
+        curr: 'د.ع',
+        qty: 'الكمية',
+        remove: 'إزالة',
+        toastAdded: 'تمت الإضافة للسلة',
+        emptyCart: 'سلة التسوق فارغة'
+      },
+      en: {
+        dir: 'ltr',
+        navHome: 'Home', navCollection: 'Collection', navAbout: 'Story',
+        heroEyebrow: 'Zenova — 2024 Collection',
+        heroTitle: 'Art of <em>Presence</em>',
+        heroSub: 'Rare compositions for those who walk their own path.',
+        heroCta: 'Explore Collection',
+        collTitle: 'The Collection',
+        cartTitle: 'Shopping Cart',
+        cartSubtotal: 'Subtotal',
+        checkoutBtn: 'Proceed to Checkout',
+        addToCart: 'Add to Cart',
+        payTitle: 'Complete Order',
+        fieldName: 'Full Name',
+        fieldPhone: 'Phone Number',
+        payMethodLabel: 'Payment Method',
+        placeOrder: 'Confirm via WhatsApp',
+        footerCopy: '© 2024 Zenova Maison. All rights reserved.',
+        curr: 'IQD',
+        qty: 'Qty',
+        remove: 'Remove',
+        toastAdded: 'Added to cart',
+        emptyCart: 'Your cart is empty'
+      },
+      tr: {
+        dir: 'ltr',
+        navHome: 'Ana Sayfa', navCollection: 'Koleksiyon', navAbout: 'Hikaye',
+        heroEyebrow: 'Zenova — 2024 Serisi',
+        heroTitle: 'Varlığın <em>Sanatı</em>',
+        heroSub: 'Kendi yolunda yürüyenler için nadir besteler.',
+        heroCta: 'Şimdi Keşfet',
+        collTitle: 'Koleksiyonumuz',
+        cartTitle: 'Sepetim',
+        cartSubtotal: 'Toplam',
+        checkoutBtn: 'Ödemeye Geç',
+        addToCart: 'Sepete Ekle',
+        payTitle: 'Siparişi Tamamla',
+        fieldName: 'Ad Soyad',
+        fieldPhone: 'Telefon',
+        payMethodLabel: 'Ödeme Yöntemi',
+        placeOrder: 'WhatsApp ile Onayla',
+        footerCopy: '© 2024 Zenova. Tüm hakları saklıdır.',
+        curr: 'IQD',
+        qty: 'Adet',
+        remove: 'Sil',
+        toastAdded: 'Sepete eklendi',
+        emptyCart: 'Sepetiniz boş'
+      },
+      ku: {
+        dir: 'rtl',
+        navHome: 'سەرەکی', navCollection: 'کۆلێکشن', navAbout: 'چیرۆک',
+        heroEyebrow: 'زێنۆڤا — عەتری ٢٠٢٤',
+        heroTitle: 'هونەری <em>ئامادەبوون</em>',
+        heroSub: 'پێکهاتە دەگمەنەکان بۆ ئەوانەی بە شێوازی خۆیان دەڕۆن.',
+        heroCta: 'کۆلێکشنەکە ببینە',
+        collTitle: 'هەموو کۆلێکشنەکە',
+        cartTitle: 'سەبەتەی کڕین',
+        cartSubtotal: 'کۆتایی',
+        checkoutBtn: 'بەردەوام بە بۆ پارەدان',
+        addToCart: 'زیادکردن بۆ سەبەتە',
+        payTitle: 'تەواوکردنی داواکاری',
+        fieldName: 'ناوی تەواو',
+        fieldPhone: 'ژمارەی مۆبایل',
+        payMethodLabel: 'ڕێگای پارەدان',
+        placeOrder: 'پشتڕاستکردنەوە لە واتسئەپ',
+        footerCopy: '© ٢٠٢٤ زێنۆڤا. هەموو مافەکان پارێزراون.',
+        curr: 'د.ع',
+        qty: 'بڕ',
+        remove: 'سڕینەوە',
+        toastAdded: 'زیادکرا بۆ سەبەتە',
+        emptyCart: 'سەبەتەکەت بەتاڵە'
+      }
+    };
+
+    /* ────────────────────────────────────
+       STATE & CORE LOGIC
+    ──────────────────────────────────── */
+    let currentLang = 'ar';
+    let cart = JSON.parse(localStorage.getItem('zenova_cart') || '[]');
+    let selectedMethod = null;
+
+    function setLang(lang) {
+      currentLang = lang;
+      const L = LANGS[lang];
+      document.documentElement.dir = L.dir;
+      document.documentElement.lang = lang;
+
+      // Update static translations
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (L[key]) el.innerHTML = L[key];
+      });
+
+      // Update active button state
+      document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang-btn') === lang);
+      });
+
+      renderProducts();
+      renderCart();
+      updateBadge();
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      const L = LANGS[currentLang];
+      grid.innerHTML = PRODUCTS.map(p => `
+        <div class="product-card">
+          <div class="product-img-wrap">
+            <img src="${p.img}" alt="${p.name}">
+            <div class="product-overlay">
+              <button class="product-add-btn" onclick="addToCart('${p.id}', '${p.name}', ${p.price}, '${p.img}')">${L.addToCart}</button>
+            </div>
+          </div>
+          <div class="product-body">
+            <h3 class="product-name">${p.name}</h3>
+            <div class="product-price">${p.price.toLocaleString()} ${L.curr}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ────────────────────────────────────
+       CART LOGIC
+    ──────────────────────────────────── */
+    function addToCart(id, name, price, img) {
+      const existing = cart.find(i => i.id === id);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ id, name, price, img, qty: 1 });
+      }
+      saveCart();
+      showToast(LANGS[currentLang].toastAdded);
+      renderCart();
+    }
+
+    function saveCart() {
+      localStorage.setItem('zenova_cart', JSON.stringify(cart));
+      updateBadge();
+    }
+
+    function updateBadge() {
+      const count = cart.reduce((acc, i) => acc + i.qty, 0);
+      const b = document.getElementById('cartBadge');
+      b.textContent = count;
+      b.classList.toggle('show', count > 0);
+    }
+
+    function renderCart() {
+      const body = document.getElementById('cartBody');
+      const foot = document.getElementById('cartFoot');
+      const L = LANGS[currentLang];
+
+      if (cart.length === 0) {
+        body.innerHTML = `<div style="text-align:center; padding:40px; opacity:0.5">${L.emptyCart}</div>`;
+        foot.style.display = 'none';
+        return;
+      }
+
+      foot.style.display = 'block';
+      body.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <div class="cart-item-img"><img src="${item.img}"></div>
+          <div>
+            <div style="font-weight:600; font-size:14px">${item.name}</div>
+            <div style="font-size:13px; color:var(--gold)">${(item.price * item.qty).toLocaleString()} ${L.curr}</div>
+            <div style="font-size:11px; margin-top:4px">${L.qty}: ${item.qty}</div>
+          </div>
+          <button onclick="removeItem('${item.id}')" style="color:var(--error); font-size:11px; text-decoration:underline">${L.remove}</button>
+        </div>
+      `).join('');
+
+      const total = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+      document.getElementById('cartTotalDisplay').textContent = `${total.toLocaleString()} ${L.curr}`;
+    }
+
+    function removeItem(id) {
+      cart = cart.filter(i => i.id !== id);
+      saveCart();
+      renderCart();
+    }
+
+    /* ────────────────────────────────────
+       UI ACTIONS
+    ──────────────────────────────────── */
+    function openCart() { document.getElementById('cartBackdrop').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); }
+    function closeCart() { document.getElementById('cartBackdrop').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); }
+    
+    function openPayment() {
+      if (cart.length === 0) return;
+      closeCart();
+      document.getElementById('paymentBackdrop').classList.add('open');
+    }
+    function closePayment() { document.getElementById('paymentBackdrop').classList.remove('open'); }
+
+    function selectMethod(btn, method) {
+      document.querySelectorAll('.pay-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedMethod = method;
+      validateForm();
+    }
+
+    function validateForm() {
+      const n = document.getElementById('custName').value.trim();
+      const p = document.getElementById('custPhone').value.trim();
+      document.getElementById('confirmBtn').disabled = !(n.length > 2 && p.length > 7 && selectedMethod);
+    }
+
+    document.getElementById('custName').addEventListener('input', validateForm);
+    document.getElementById('custPhone').addEventListener('input', validateForm);
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    /* ────────────────────────────────────
+       ORDER FINALIZATION
+    ──────────────────────────────────── */
+    function handleFinalOrder() {
+      const name = document.getElementById('custName').value;
+      const phone = document.getElementById('custPhone').value;
+      const total = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+      const itemsText = cart.map(i => `- ${i.name} (x${i.qty})`).join('%0A');
+      const orderId = 'ZN' + Math.floor(Math.random() * 9000 + 1000);
+
+      let msg = `*ZENOVA ORDER: ${orderId}*%0A%0A`;
+      msg += `*Name:* ${name}%0A`;
+      msg += `*Phone:* ${phone}%0A`;
+      msg += `*Payment:* ${selectedMethod}%0A%0A`;
+      msg += `*Items:*%0A${itemsText}%0A%0A`;
+      msg += `*Total:* ${total.toLocaleString()} IQD`;
+
+      const url = `https://api.whatsapp.com/send?phone=${MERCHANT_PHONE}&text=${msg}`;
+      
+      cart = [];
+      saveCart();
+      window.location.href = url;
+    }
+
+    /* INITIALIZE */
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+        setLang('ar');
+      }, 1000);
+    };
+  </script>
+</body>
+</html>
